@@ -558,48 +558,55 @@
       <div class="card-media">
         <span class="media-tag">DEMO</span>
         <button class="gallery-btn" id="t-gallery-btn-1" onclick="event.stopPropagation(); openGallery('insightflow')">⊞ Gallery</button>
-        <video autoplay muted loop playsinline poster="assets/img/insightflow-fallback.png">
+        <video autoplay muted loop playsinline preload="metadata" poster="assets/img/insightflow-1.webp" aria-label="InsightFlow demo: asking the AI analyst a question and browsing the dashboard">
           <source src="assets/video/insightflow-demo.mp4" type="video/mp4">
         </video>
       </div>
       <div class="card-body">
       <div class="card-title">InsightFlow</div>
       <p class="card-desc" id="t-card1-desc">
-        Ask a business question in plain English — "what's our MRR growth?" — and get an instant answer with a chart and a short explanation, no SQL required.
+        Revenue, churn and retention for a B2B SaaS company, plus an AI analyst you can ask in plain English: it writes and checks the SQL, runs it on BigQuery and explains the answer. Bilingual (EN/ES).
       </p>
       <div class="card-tags">
         <span class="tag">BigQuery</span>
         <span class="tag">dbt</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">Next.js</span>
         <span class="tag">OpenAI API</span>
-        <span class="tag">Streamlit</span>
       </div>
       <div class="card-links">
-        <a href="https://insightflow-agent2.streamlit.app/" target="_blank" id="t-live-1">Live App ↗</a>
-        <a href="https://github.com/antuelquirino/InsightFlow" target="_blank">GitHub ↗</a>
+        <a href="https://insight-flow-five-beta.vercel.app" target="_blank" rel="noopener" id="t-live-1">Live dashboard ↗</a>
+        <a href="https://insightflow-api-936762673660.europe-west1.run.app/docs" target="_blank" rel="noopener" id="t-api-1">API docs ↗</a>
+        <a href="https://github.com/antuelquirino/InsightFlow" target="_blank" rel="noopener">GitHub ↗</a>
       </div>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-media" onclick="openGallery('financial')">
-        <img src="assets/img/financial-market-analysis.png" alt="Financial Market Analysis dashboard screenshot">
-        <div class="media-hint"><span id="t-gallery-hint-2">View gallery →</span></div>
+      <div class="card-media">
+        <span class="media-tag">DEMO</span>
+        <button class="gallery-btn" id="t-gallery-btn-2" onclick="event.stopPropagation(); openGallery('financial')">⊞ Gallery</button>
+        <video autoplay muted loop playsinline preload="metadata" poster="assets/img/financial-market-1.webp" aria-label="Financial Market demo: changing ticker and period, then the Risk and Sectors screens">
+          <source src="assets/video/financial-market-demo.mp4" type="video/mp4">
+        </video>
       </div>
       <div class="card-body">
       <div class="card-title">Financial Market Analysis</div>
       <p class="card-desc" id="t-card2-desc">
-        A live dashboard that tracks how risky and profitable a stock has been — Sharpe ratio, volatility, drawdown — updated automatically every day, with a second view comparing whole market sectors.
+        Every weekday after the US close, a pipeline loads prices for stocks and the 11 sector ETFs, computes return and risk (drawdown, volatility, Sharpe, beta) with dbt, and updates a bilingual dashboard that compares everything with the S&amp;P 500.
       </p>
       <div class="card-tags">
         <span class="tag">BigQuery</span>
         <span class="tag">dbt</span>
-        <span class="tag">Streamlit</span>
-        <span class="tag">Tableau</span>
+        <span class="tag">FastAPI</span>
+        <span class="tag">Next.js</span>
+        <span class="tag">GitHub Actions</span>
       </div>
       <div class="card-links">
-        <a href="https://financial-market-analysis-eebjsbfnfsd57txv6wrgra.streamlit.app/" target="_blank" id="t-live-2">Live App ↗</a>
-        <a href="https://public.tableau.com/app/profile/antuel.quirino/viz/Perfomancevs_Benchmark/Dashboard1?publish=yes" target="_blank">Tableau ↗</a>
-        <a href="https://github.com/antuelquirino/Financial-Market-Analysis" target="_blank">GitHub ↗</a>
+        <a href="https://financial-market-analysis.vercel.app" target="_blank" rel="noopener" id="t-live-2">Live dashboard ↗</a>
+        <a href="https://market-api-7cjzbizs7q-uc.a.run.app/docs" target="_blank" rel="noopener" id="t-api-2">API docs ↗</a>
+        <a href="https://public.tableau.com/app/profile/antuel.quirino/viz/Perfomancevs_Benchmark/Dashboard1" target="_blank" rel="noopener">Tableau ↗</a>
+        <a href="https://github.com/antuelquirino/Financial-Market-Analysis" target="_blank" rel="noopener">GitHub ↗</a>
       </div>
       </div>
     </div>
@@ -712,15 +719,20 @@
 <script>
   const galleries = {
     financial: [
-      "assets/img/financial-market-analysis.png",
-      "assets/img/financial-market-analysis-1.png",
-      "assets/img/financial-market-analysis-2.png",
-      "assets/img/financial-market-analysis-3.png",
-      "assets/img/financial-market-analysis-4.png",
-      "assets/img/financial-market-analysis-5.png"
+      "assets/img/financial-market-1.webp",
+      "assets/img/financial-market-2.webp",
+      "assets/img/financial-market-3.webp",
+      "assets/img/financial-market-4.webp",
+      "assets/img/financial-market-5.webp",
+      "assets/img/financial-market-6.webp"
     ],
     insightflow: [
-      "assets/img/insightflow-fallback.png"
+      "assets/img/insightflow-1.webp",
+      "assets/img/insightflow-2.webp",
+      "assets/img/insightflow-3.webp",
+      "assets/img/insightflow-4.webp",
+      "assets/img/insightflow-5.webp",
+      "assets/img/insightflow-6.webp"
     ],
     fx: [
       "assets/img/fx-datalake.png"
@@ -788,12 +800,14 @@
       't-hero-sub': "From raw APIs to production-grade web dashboards, I extract and transform data, secure it end to end, and design the interfaces that turn it into KPIs — giving teams the reliable, up-to-date numbers they need for data-driven decisions.",
       't-pipe-1': 'EXTRACT', 't-pipe-2': 'TRANSFORM', 't-pipe-3': 'LOAD', 't-pipe-4': 'ANALYZE',
       't-work-title': "Selected Projects",
-      't-card1-desc': 'Ask a business question in plain English — "what\'s our MRR growth?" — and get an instant answer with a chart and a short explanation, no SQL required.',
-      't-live-1': 'Live App ↗',
+      't-card1-desc': 'Revenue, churn and retention for a B2B SaaS company, plus an AI analyst you can ask in plain English: it writes and checks the SQL, runs it on BigQuery and explains the answer. Bilingual (EN/ES).',
+      't-live-1': 'Live dashboard ↗',
+      't-api-1': 'API docs ↗',
       't-gallery-btn-1': '⊞ Gallery',
-      't-card2-desc': 'A live dashboard that tracks how risky and profitable a stock has been — Sharpe ratio, volatility, drawdown — updated automatically every day, with a second view comparing whole market sectors.',
-      't-live-2': 'Live App ↗',
-      't-gallery-hint-2': 'View gallery →',
+      't-card2-desc': 'Every weekday after the US close, a pipeline loads prices for stocks and the 11 sector ETFs, computes return and risk (drawdown, volatility, Sharpe, beta) with dbt, and updates a bilingual dashboard that compares everything with the S&amp;P 500.',
+      't-live-2': 'Live dashboard ↗',
+      't-api-2': 'API docs ↗',
+      't-gallery-btn-2': '⊞ Gallery',
       't-card3-desc': 'A live map for a bike-rental business, showing exactly where every bike is and flagging any that go missing or need maintenance — built as a working prototype for a real small business.',
       't-live-3': 'Live App ↗',
       't-gallery-btn-3': '⊞ Gallery',
@@ -817,12 +831,14 @@
       't-hero-sub': 'Desde APIs sin procesar hasta dashboards web de nivel profesional: extraigo y transformo datos, los manejo de forma segura de punta a punta, y diseño las interfaces que los convierten en KPIs — dándole a los equipos los números confiables y actualizados que necesitan para tomar decisiones basadas en datos.',
       't-pipe-1': 'EXTRAER', 't-pipe-2': 'TRANSFORMAR', 't-pipe-3': 'CARGAR', 't-pipe-4': 'ANALIZAR',
       't-work-title': 'Proyectos destacados',
-      't-card1-desc': 'Preguntá algo de negocio en lenguaje simple — "¿cómo viene el crecimiento del MRR?" — y obtené una respuesta instantánea con gráfico y explicación, sin escribir SQL.',
-      't-live-1': 'App en vivo ↗',
+      't-card1-desc': 'Ingresos, bajas y retención de una empresa B2B SaaS, y un analista de IA al que le preguntás en lenguaje natural: escribe y valida el SQL, lo ejecuta en BigQuery y explica la respuesta. Bilingüe (EN/ES).',
+      't-live-1': 'Dashboard en vivo ↗',
+      't-api-1': 'API ↗',
       't-gallery-btn-1': '⊞ Galería',
-      't-card2-desc': 'Un dashboard en vivo que mide qué tan riesgosa y rentable fue una acción — Sharpe ratio, volatilidad, drawdown — actualizado automáticamente cada día, con una segunda vista que compara sectores enteros del mercado.',
-      't-live-2': 'App en vivo ↗',
-      't-gallery-hint-2': 'Ver galería →',
+      't-card2-desc': 'Cada día hábil, después del cierre en EE. UU., un pipeline carga precios de acciones y de los 11 ETF sectoriales, calcula rendimiento y riesgo (drawdown, volatilidad, Sharpe, beta) con dbt y actualiza un dashboard bilingüe que compara todo contra el S&amp;P 500.',
+      't-live-2': 'Dashboard en vivo ↗',
+      't-api-2': 'API ↗',
+      't-gallery-btn-2': '⊞ Galería',
       't-card3-desc': 'Un mapa en vivo para un negocio de alquiler de bicicletas, mostrando exactamente dónde está cada una y marcando las que faltan o necesitan mantenimiento — construido como prototipo real para una pequeña empresa.',
       't-live-3': 'App en vivo ↗',
       't-gallery-btn-3': '⊞ Galería',
