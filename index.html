@@ -4,689 +4,519 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Antuel Quirino — Data Engineering & Dashboard Design</title>
+<meta name="description" content="Antuel Quirino, data and analytics engineer: pipelines in BigQuery and dbt, secure APIs, and dashboards with AI agents that answer questions about the data.">
+<meta name="theme-color" content="#0F1420">
+
+<!-- Link previews (LinkedIn, WhatsApp, Slack…) -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://antuelquirino.github.io/">
+<meta property="og:title" content="Antuel Quirino — Data Engineering & Dashboard Design">
+<meta property="og:description" content="Clean, secure data turned into dashboards for analysis and decision-making. Live projects with BigQuery, dbt, FastAPI, Next.js and AI agents.">
+<meta property="og:image" content="https://antuelquirino.github.io/assets/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230F1420'/%3E%3Ctext x='32' y='43' font-family='Arial,sans-serif' font-size='28' font-weight='700' text-anchor='middle' fill='%23E8A33D'%3EAQ%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root{
     --bg: #0F1420;
+    --bg-deep: #0B0F19;
     --surface: #171D2E;
     --surface-2: #1D2438;
     --border: #2A3350;
+    --border-soft: #222A42;
     --text: #EDEFF5;
     --text-muted: #8B93A7;
+    --text-dim: #6B7389;
     --accent: #E8A33D;
     --accent-soft: rgba(232,163,61,0.12);
+    --accent-glow: rgba(232,163,61,0.35);
     --teal: #4FD1C5;
+    --radius: 16px;
+    --wrap: 1120px;
   }
 
   *{ box-sizing: border-box; margin:0; padding:0; }
-
-  html{ scroll-behavior: smooth; }
-
+  html{ scroll-behavior: smooth; scroll-padding-top: 76px; }
   body{
     background: var(--bg);
     color: var(--text);
     font-family: 'Inter', sans-serif;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-
   a{ color: inherit; text-decoration: none; }
+  ::selection{ background: var(--accent); color: var(--bg); }
+  :focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 
-  .wrap{
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 0 32px;
-  }
+  .mono{ font-family: 'JetBrains Mono', monospace; }
 
   /* ---------- NAV ---------- */
   header.nav{
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: rgba(15,20,32,0.85);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(15,20,32,0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid transparent;
+    transition: border-color .25s ease, background .25s ease;
   }
+  header.nav.scrolled{ border-bottom-color: var(--border); background: rgba(15,20,32,0.9); }
   .nav-inner{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding: 18px 32px;
-    max-width: 1100px;
-    margin: 0 auto;
+    display:flex; align-items:center; justify-content:space-between; gap: 16px;
+    padding: 16px 32px; max-width: var(--wrap); margin: 0 auto;
   }
   .nav-name{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight:600;
-    font-size: 16px;
-    letter-spacing: 0.01em;
+    font-family:'Space Grotesk', sans-serif; font-weight:600; font-size: 16px;
+    letter-spacing: 0.01em; white-space: nowrap;
+    display:flex; align-items:center; gap: 10px;
   }
-  .nav-links{
-    display:flex;
-    gap: 28px;
-    font-size: 14px;
-    color: var(--text-muted);
+  .nav-mark{
+    width: 26px; height: 26px; border-radius: 7px;
+    display:grid; place-items:center;
+    font-size: 11px; font-weight: 700; color: var(--bg); background: var(--accent);
   }
+  .nav-right{ display:flex; align-items:center; gap: 22px; }
+  .nav-links{ display:flex; gap: 24px; font-size: 14px; color: var(--text-muted); }
+  .nav-links a{ transition: color .2s ease; }
   .nav-links a:hover{ color: var(--text); }
-
   .lang-toggle{
-    display:flex;
-    gap: 4px;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 3px;
-    margin-left: 6px;
+    display:flex; gap: 2px; border: 1px solid var(--border); border-radius: 20px; padding: 3px;
   }
   .lang-toggle button{
-    font-family:'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.03em;
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    padding: 5px 11px;
-    border-radius: 16px;
-    cursor: pointer;
+    font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.03em;
+    background: none; border: none; color: var(--text-muted);
+    padding: 5px 11px; border-radius: 16px; cursor: pointer;
     transition: background .2s ease, color .2s ease;
   }
-  .lang-toggle button.active{
-    background: var(--accent);
-    color: var(--bg);
-    font-weight: 500;
-  }
+  .lang-toggle button.active{ background: var(--accent); color: var(--bg); font-weight: 500; }
   .lang-toggle button:not(.active):hover{ color: var(--text); }
+  @media (max-width: 640px){
+    .nav-inner{ padding: 12px 20px; }
+    .nav-right{ gap: 14px; }
+    .nav-links{ gap: 14px; font-size: 13px; }
+    .nav-name .nav-full{ display:none; }
+  }
+  @media (max-width: 400px){ .nav-links a[href="#about"]{ display:none; } }
 
   /* ---------- HERO ---------- */
-  .hero{
-    padding: 120px 32px 90px;
-    max-width: 1100px;
-    margin: 0 auto;
+  .hero{ position: relative; isolation: isolate; overflow: hidden; }
+  .hero::before{
+    /* faint dot grid that fades out toward the edges */
+    content:""; position:absolute; inset: 0; z-index:-1;
+    background-image: radial-gradient(rgba(139,147,167,0.2) 1px, transparent 1.2px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse 65% 70% at 78% 30%, #000 25%, transparent 72%);
+            mask-image: radial-gradient(ellipse 65% 70% at 78% 30%, #000 25%, transparent 72%);
   }
+  .hero::after{
+    content:""; position:absolute; z-index:-1; pointer-events:none;
+    width: 620px; height: 620px; right: -160px; top: -10px;
+    background: radial-gradient(closest-side, rgba(232,163,61,0.11), rgba(232,163,61,0.04) 55%, transparent);
+  }
+  .hero-inner{ padding: 108px 32px 72px; max-width: var(--wrap); margin: 0 auto; }
   .eyebrow{
-    font-family:'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--accent);
-    margin-bottom: 20px;
-    display:flex;
-    align-items:center;
-    gap: 10px;
+    font-family:'JetBrains Mono', monospace; font-size: 12.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 22px;
+    display:flex; align-items:center; gap: 10px;
   }
   .eyebrow::before{
-    content:"";
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: var(--accent);
-    display:inline-block;
+    content:""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+    box-shadow: 0 0 0 4px var(--accent-soft); flex-shrink: 0;
   }
   h1{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight: 600;
-    font-size: clamp(34px, 5vw, 54px);
-    line-height: 1.12;
-    letter-spacing: -0.01em;
-    max-width: 780px;
+    font-family:'Space Grotesk', sans-serif; font-weight: 600;
+    font-size: clamp(34px, 5.2vw, 58px); line-height: 1.1; letter-spacing: -0.015em;
+    max-width: 820px; text-wrap: balance;
   }
   h1 .accent{ color: var(--accent); }
   .hero-sub{
-    margin-top: 22px;
-    font-size: 17px;
-    color: var(--text-muted);
-    max-width: 560px;
-    line-height: 1.65;
+    margin-top: 24px; font-size: 17px; color: var(--text-muted);
+    max-width: 580px; line-height: 1.7;
   }
+  .cta{ display:flex; flex-wrap:wrap; gap: 12px; }
+  .hero .cta{ margin-top: 34px; }
+  .btn{
+    display:inline-flex; align-items:center; gap: 8px;
+    font-size: 14.5px; font-weight: 500; padding: 11px 20px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--text);
+    transition: transform .2s ease, border-color .2s ease, background .2s ease, color .2s ease;
+  }
+  .btn:hover{ transform: translateY(-1px); border-color: var(--accent); color: var(--accent); }
+  .btn-primary{ background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .btn-primary:hover{ background: #F0B356; color: var(--bg); }
 
   /* ---------- PIPELINE (signature element) ---------- */
   .pipeline{
-    margin-top: 64px;
-    display:flex;
-    align-items:center;
-    width: 100%;
-    overflow-x: auto;
+    margin-top: 64px; display:grid; grid-template-columns: repeat(4, 1fr);
+    border: 1px solid var(--border-soft); border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(23,29,46,0.7), rgba(23,29,46,0.3));
   }
-  .pipe-node{
-    display:flex;
-    flex-direction: column;
-    align-items:center;
-    gap: 10px;
-    flex-shrink: 0;
-    width: 140px;
+  .pipe-node{ position: relative; padding: 20px 22px 22px; border-right: 1px solid var(--border-soft); }
+  .pipe-node:last-child{ border-right: none; }
+  .pipe-node::after{
+    /* arrow between steps, sitting on the divider */
+    content:"→"; position:absolute; right: -10px; top: 19px; z-index: 1;
+    font-family:'JetBrains Mono', monospace; font-size: 13px; color: var(--text-dim);
+    background: #131828; padding: 1px 3px; line-height: 1;
   }
+  .pipe-node:last-child::after{ display:none; }
+  .pipe-head{ display:flex; align-items:center; gap: 10px; }
   .pipe-dot{
-    width: 14px; height:14px;
-    border-radius:50%;
-    background: var(--surface-2);
-    border: 2px solid var(--border);
-    position: relative;
-    transition: all .3s ease;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--surface-2); border: 2px solid var(--border);
+    animation: pulse 6s ease-in-out infinite;
   }
-  .pipe-node:hover .pipe-dot{
-    border-color: var(--accent);
-    background: var(--accent);
-    box-shadow: 0 0 0 6px var(--accent-soft);
+  .pipe-node:nth-child(2) .pipe-dot{ animation-delay: 1.5s; }
+  .pipe-node:nth-child(3) .pipe-dot{ animation-delay: 3s; }
+  .pipe-node:nth-child(4) .pipe-dot{ animation-delay: 4.5s; }
+  @keyframes pulse{
+    0%, 24%, 100%{ background: var(--surface-2); border-color: var(--border); box-shadow: none; }
+    6%, 16%{ background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 5px var(--accent-soft), 0 0 14px var(--accent-glow); }
   }
+  .pipe-num{ font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim); }
   .pipe-label{
-    font-family:'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--text-muted);
-    letter-spacing: 0.02em;
-    text-align:center;
+    font-family:'JetBrains Mono', monospace; font-size: 12.5px; letter-spacing: 0.06em;
+    color: var(--text); margin-top: 12px;
   }
-  .pipe-line{
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(90deg, var(--border), var(--border) 60%, transparent);
-    margin: 0 -6px;
-    min-width: 24px;
+  .pipe-tools{ font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+  @media (max-width: 760px){
+    .pipeline{ grid-template-columns: 1fr 1fr; }
+    .pipe-node:nth-child(2){ border-right: none; }
+    .pipe-node:nth-child(-n+2){ border-bottom: 1px solid var(--border-soft); }
+    .pipe-node::after{ display:none; }
   }
 
-  /* ---------- SECTION HEADS ---------- */
-  .section{ padding: 70px 32px; max-width: 1100px; margin: 0 auto; }
-  .section-head{
-    display:flex;
-    align-items: baseline;
-    gap: 16px;
-    margin-bottom: 44px;
-  }
-  .section-num{
-    font-family:'JetBrains Mono', monospace;
-    color: var(--accent);
-    font-size: 13px;
-  }
-  .section-title{
-    font-family:'Space Grotesk', sans-serif;
-    font-size: 26px;
-    font-weight: 600;
-  }
-  .section-line{
-    flex:1;
-    height:1px;
-    background: var(--border);
+  /* ---------- SECTIONS ---------- */
+  .section{ padding: 72px 32px; max-width: var(--wrap); margin: 0 auto; }
+  .section-head{ display:flex; align-items: baseline; gap: 16px; margin-bottom: 40px; }
+  .section-num{ font-family:'JetBrains Mono', monospace; color: var(--accent); font-size: 13px; }
+  .section-title{ font-family:'Space Grotesk', sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; }
+  .section-line{ flex:1; height:1px; background: linear-gradient(90deg, var(--border), transparent); }
+  .subhead{
+    font-family:'JetBrains Mono', monospace; font-size: 12px; font-weight: 400; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-muted); margin: 64px 0 22px;
   }
 
-  /* ---------- PROJECT GRID ---------- */
-  .grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  @media (max-width: 760px){ .grid{ grid-template-columns: 1fr; } }
-
-  .card{
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    overflow: hidden;
-    display:flex;
-    flex-direction: column;
-    transition: border-color .25s ease, transform .25s ease;
-  }
-  .card:hover{
-    border-color: var(--accent);
-    transform: translateY(-3px);
-  }
-
-  .card-media{
-    width: 100%;
-    aspect-ratio: 16 / 10;
+  /* ---------- BROWSER FRAME around project media ---------- */
+  .frame{
+    border: 1px solid var(--border); border-radius: 12px; overflow: hidden;
     background: var(--surface-2);
-    border-bottom: 1px solid var(--border);
-    overflow: hidden;
-    position: relative;
+    box-shadow: 0 24px 48px -28px rgba(0,0,0,0.75);
   }
-  .card-media img,
-  .card-media video{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
+  .frame-bar{
+    display:flex; align-items:center; gap: 10px; padding: 9px 12px;
+    background: #141A2A; border-bottom: 1px solid var(--border);
   }
-  .media-tag{
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    color: var(--text);
-    background: rgba(15,20,32,0.7);
-    backdrop-filter: blur(4px);
-    border: 1px solid var(--border);
-    padding: 3px 8px;
-    border-radius: 20px;
+  .frame-dots{ display:flex; gap: 6px; flex-shrink:0; }
+  .frame-dots i{ width: 9px; height: 9px; border-radius: 50%; background: #2E3752; display:block; }
+  .frame-url{
+    flex: 1; min-width: 0; font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--text-dim);
+    background: var(--bg-deep); border: 1px solid var(--border-soft); border-radius: 6px;
+    padding: 3px 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .frame-actions{ display:flex; gap: 6px; flex-shrink: 0; }
+  .chip{
+    font-family:'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.04em;
+    color: var(--text-muted); background: transparent; border: 1px solid var(--border);
+    border-radius: 999px; padding: 3px 9px; display:inline-flex; align-items:center; gap: 6px;
+  }
+  .chip-live::before{
+    content:""; width: 6px; height: 6px; border-radius: 50%; background: #3DDC97;
+    box-shadow: 0 0 0 3px rgba(61,220,151,0.15);
+  }
+  button.chip{ cursor: pointer; transition: color .2s ease, border-color .2s ease; }
+  button.chip:hover{ color: var(--accent); border-color: var(--accent); }
+  .frame-media{ aspect-ratio: 16 / 10; overflow: hidden; background: var(--surface-2); cursor: zoom-in; }
+  .frame-media img, .frame-media video{
+    width: 100%; height: 100%; object-fit: cover; object-position: top center; display: block;
+    transition: transform .6s ease;
+  }
+  @media (max-width: 420px){ .chip-live{ display:none; } }
+
+  /* ---------- FEATURED PROJECTS ---------- */
+  .featured{ display:flex; flex-direction: column; gap: 28px; }
+  .feature{
+    display:grid; grid-template-columns: minmax(0, 1.18fr) minmax(0, 1fr); gap: 40px; align-items: center;
+    padding: 28px; border: 1px solid var(--border-soft); border-radius: 20px;
+    background: linear-gradient(180deg, var(--surface), rgba(23,29,46,0.55));
+    transition: border-color .3s ease;
+  }
+  .feature:hover{ border-color: var(--border); }
+  .feature:hover .frame-media img, .feature:hover .frame-media video{ transform: scale(1.015); }
+  .feature.flip .feature-media{ order: 2; }
+  /* grid items default to min-width:auto; the 1200px video would force overflow */
+  .feature-media, .feature-body, .card{ min-width: 0; }
+  .feature-body{ display:flex; flex-direction: column; gap: 16px; }
+  .kicker{
+    font-family:'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .feature-title{ font-family:'Space Grotesk', sans-serif; font-size: 28px; font-weight: 600; letter-spacing: -0.01em; line-height: 1.15; }
+  .desc{ color: var(--text-muted); font-size: 15px; line-height: 1.7; }
+  .highlights{ list-style: none; display:flex; flex-direction: column; gap: 9px; }
+  .highlights li{ position: relative; padding-left: 20px; font-size: 14px; line-height: 1.55; color: #C4C9D6; }
+  .highlights li::before{
+    content:""; position:absolute; left: 2px; top: 8px; width: 6px; height: 6px;
+    border-radius: 1px; background: var(--accent); transform: rotate(45deg);
+  }
+  @media (max-width: 900px){
+    .feature{ grid-template-columns: minmax(0, 1fr); gap: 26px; padding: 18px 18px 24px; }
+    .feature.flip .feature-media{ order: 0; }
+    .feature-body{ padding: 0 6px; }
+    .feature-title{ font-size: 24px; }
   }
 
-  .card-body{
-    padding: 26px 30px 30px;
-    display:flex;
-    flex-direction: column;
-    gap: 18px;
-    flex: 1;
+  /* ---------- MORE PROJECTS ---------- */
+  .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 24px; }
+  .card{
+    display:flex; flex-direction: column; gap: 18px; padding: 16px 16px 22px;
+    border: 1px solid var(--border-soft); border-radius: 18px; background: var(--surface);
+    transition: border-color .3s ease, transform .3s ease;
   }
+  .card:hover{ border-color: var(--border); transform: translateY(-3px); }
+  .card-body{ display:flex; flex-direction: column; gap: 14px; padding: 0 8px; flex: 1; }
+  .card-title{ font-family:'Space Grotesk', sans-serif; font-size: 19px; font-weight: 600; }
+  .card .desc{ font-size: 14px; }
 
-  .card-title{
-    font-family:'Space Grotesk', sans-serif;
-    font-size: 19px;
-    font-weight: 600;
-  }
-  .card-desc{
-    color: var(--text-muted);
-    font-size: 14.5px;
-    line-height: 1.65;
-  }
-  .card-tags{
-    display:flex;
-    flex-wrap:wrap;
-    gap: 8px;
-  }
+  .tags{ display:flex; flex-wrap:wrap; gap: 7px; }
   .tag{
-    font-family:'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--teal);
-    background: rgba(79,209,197,0.08);
-    border: 1px solid rgba(79,209,197,0.25);
-    padding: 4px 9px;
-    border-radius: 20px;
+    font-family:'JetBrains Mono', monospace; font-size: 11px; color: var(--teal);
+    background: rgba(79,209,197,0.07); border: 1px solid rgba(79,209,197,0.22);
+    padding: 3px 9px; border-radius: 999px;
   }
-  .card-links{
-    display:flex;
-    gap: 18px;
-    margin-top: auto;
-    padding-top: 6px;
-    font-size: 13.5px;
-    font-weight: 500;
-  }
-  .card-links a{
-    display:flex;
-    align-items:center;
-    gap: 6px;
-    color: var(--text);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 2px;
+  .links{ display:flex; flex-wrap: wrap; gap: 8px 18px; margin-top: auto; padding-top: 4px; font-size: 13.5px; font-weight: 500; }
+  .links a{
+    display:inline-flex; align-items:center; gap: 6px; white-space: nowrap;
+    color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 2px;
     transition: border-color .2s ease, color .2s ease;
   }
-  .card-links a:hover{ color: var(--accent); border-color: var(--accent); }
+  .links a:hover{ color: var(--accent); border-color: var(--accent); }
+  .links a.primary{ color: var(--accent); border-color: rgba(232,163,61,0.45); }
+  .links a .arrow{ font-size: 12px; transition: transform .2s ease; }
+  .links a:hover .arrow{ transform: translate(2px,-2px); }
 
   /* ---------- ABOUT ---------- */
-  .about-text{
-    max-width: 640px;
-    color: var(--text-muted);
-    font-size: 15.5px;
-    line-height: 1.75;
+  .about-grid{ display:grid; grid-template-columns: 1.4fr 1fr; gap: 56px; align-items: start; }
+  .about-text{ color: var(--text-muted); font-size: 16px; line-height: 1.8; }
+  .stack{
+    border: 1px solid var(--border-soft); border-radius: var(--radius); padding: 22px 24px;
+    background: rgba(23,29,46,0.5); display:flex; flex-direction: column; gap: 16px;
   }
-  .about-text strong{ color: var(--text); font-weight: 600; }
+  .stack-row{ display:flex; flex-direction: column; gap: 8px; }
+  .stack-label{ font-family:'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
+  @media (max-width: 860px){ .about-grid{ grid-template-columns: 1fr; gap: 32px; } }
 
-  /* ---------- FOOTER ---------- */
-  footer{
-    border-top: 1px solid var(--border);
-    padding: 46px 32px 60px;
-  }
-  .footer-inner{
-    max-width: 1100px;
-    margin: 0 auto;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  .footer-name{
-    font-family:'Space Grotesk', sans-serif;
-    font-weight: 600;
-  }
-  .footer-links{
-    display:flex;
-    gap: 26px;
-    font-size: 14px;
-    color: var(--text-muted);
-  }
-  .footer-links a:hover{ color: var(--accent); }
-
-  .cert-list{
-    max-width: 640px;
-    display:flex;
-    flex-direction: column;
-    gap: 18px;
-  }
+  /* ---------- EDUCATION ---------- */
+  .cert-list{ display:grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px; }
   .cert-item{
-    display:flex;
-    gap: 16px;
-    align-items: baseline;
+    display:flex; gap: 16px; align-items: flex-start; padding: 20px 22px;
+    border: 1px solid var(--border-soft); border-radius: 14px; background: rgba(23,29,46,0.5);
   }
-  .cert-year{
-    font-family:'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    color: var(--accent);
-    flex-shrink:0;
-    width: 48px;
+  .cert-icon{
+    width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0; display:grid; place-items:center;
+    background: var(--accent-soft); color: var(--accent); font-size: 14px;
   }
-  .cert-body strong{
-    display:block;
-    font-size: 15px;
-    color: var(--text);
-    font-weight: 600;
+  .cert-body strong{ display:block; font-size: 15px; color: var(--text); font-weight: 600; line-height: 1.4; }
+  .cert-body span{ display:block; margin-top: 4px; font-size: 13.5px; color: var(--text-muted); }
+
+  /* ---------- CONTACT / FOOTER ---------- */
+  .contact{
+    padding: 44px; border-radius: 22px; border: 1px solid var(--border);
+    background:
+      radial-gradient(circle at 100% 0%, rgba(232,163,61,0.13), transparent 50%),
+      linear-gradient(180deg, var(--surface), rgba(23,29,46,0.6));
+    display:flex; align-items:center; justify-content: space-between; gap: 28px; flex-wrap: wrap;
   }
-  .cert-body span{
-    font-size: 13.5px;
-    color: var(--text-muted);
+  .contact h2{ font-family:'Space Grotesk', sans-serif; font-size: clamp(24px, 3vw, 32px); font-weight: 600; letter-spacing: -0.01em; max-width: 520px; line-height: 1.2; }
+  .contact p{ color: var(--text-muted); margin-top: 10px; font-size: 15px; }
+  footer{ border-top: 1px solid var(--border-soft); margin-top: 24px; }
+  .footer-inner{
+    max-width: var(--wrap); margin: 0 auto; padding: 28px 32px 40px;
+    display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 16px;
+    font-size: 13.5px; color: var(--text-dim);
+  }
+  .footer-links{ display:flex; gap: 22px; color: var(--text-muted); }
+  .footer-links a:hover{ color: var(--accent); }
+  @media (max-width: 640px){
+    .section, .hero-inner{ padding-left: 20px; padding-right: 20px; }
+    .section{ padding-top: 56px; padding-bottom: 56px; }
+    .hero-inner{ padding-top: 64px; }
+    .contact{ padding: 28px 24px; }
+    .footer-inner{ padding: 24px 20px 32px; }
   }
 
-  @media (prefers-reduced-motion: reduce){
-    *{ transition: none !important; scroll-behavior: auto !important; }
-  }
-
-  /* ---------- GALLERY HINT ---------- */
-  .card-media{ cursor: pointer; }
-  .media-hint{
-    position: absolute;
-    inset: 0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background: rgba(15,20,32,0);
-    opacity: 0;
-    transition: opacity .2s ease, background .2s ease;
-  }
-  .card-media:hover .media-hint{
-    opacity: 1;
-    background: rgba(15,20,32,0.45);
-  }
-  .media-hint span{
-    font-family:'JetBrains Mono', monospace;
-    font-size: 12.5px;
-    letter-spacing: 0.04em;
-    color: var(--text);
-    border: 1px solid var(--text);
-    padding: 7px 14px;
-    border-radius: 30px;
-    background: rgba(15,20,32,0.6);
-  }
-  .gallery-btn{
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    z-index: 2;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 0.05em;
-    color: var(--text);
-    background: rgba(15,20,32,0.7);
-    backdrop-filter: blur(4px);
-    border: 1px solid var(--border);
-    padding: 5px 10px;
-    border-radius: 20px;
-    display:flex;
-    align-items:center;
-    gap: 5px;
-  }
-  .gallery-btn:hover{ border-color: var(--accent); color: var(--accent); }
+  /* ---------- REVEAL ON SCROLL ---------- */
+  .js .reveal{ opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+  .js .reveal.in{ opacity: 1; transform: none; }
 
   /* ---------- LIGHTBOX ---------- */
   .lightbox{
-    position: fixed;
-    inset: 0;
-    z-index: 100;
-    background: rgba(8,10,17,0.92);
-    backdrop-filter: blur(6px);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding: 40px;
+    position: fixed; inset: 0; z-index: 100; background: rgba(8,10,17,0.94);
+    backdrop-filter: blur(6px); display:none; align-items:center; justify-content:center;
+    flex-direction: column; padding: 64px 40px 28px;
   }
   .lightbox.open{ display:flex; }
-  .lightbox-frame{
-    position: relative;
-    max-width: 1000px;
-    width: 100%;
-  }
+  .lightbox-frame{ position: relative; max-width: 1100px; width: 100%; }
   .lightbox-frame img{
-    width: 100%;
-    max-height: 78vh;
-    object-fit: contain;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    width: 100%; max-height: 74vh; object-fit: contain; border-radius: 12px;
+    border: 1px solid var(--border); background: var(--surface); display:block;
   }
   .lightbox-close{
-    position: absolute;
-    top: -46px;
-    right: 0;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--text-muted);
-    background: none;
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 7px 16px;
-    cursor: pointer;
+    position: absolute; top: -48px; right: 0; font-family:'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--text-muted); background: none; border: 1px solid var(--border); border-radius: 20px;
+    padding: 7px 16px; cursor: pointer;
   }
   .lightbox-close:hover{ color: var(--text); border-color: var(--accent); }
   .lightbox-nav{
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(15,20,32,0.7);
-    border: 1px solid var(--border);
-    color: var(--text);
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 18px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(15,20,32,0.85); border: 1px solid var(--border); color: var(--text);
+    width: 44px; height: 44px; border-radius: 50%; cursor: pointer;
+    font-family:'JetBrains Mono', monospace; font-size: 18px; display:flex; align-items:center; justify-content:center;
   }
   .lightbox-nav:hover{ border-color: var(--accent); color: var(--accent); }
-  .lightbox-prev{ left: -21px; }
-  .lightbox-next{ right: -21px; }
-  .lightbox-counter{
-    text-align:center;
-    margin-top: 14px;
-    font-family:'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--text-muted);
+  .lightbox-prev{ left: -22px; }
+  .lightbox-next{ right: -22px; }
+  .lightbox-caption{
+    margin-top: 16px; display:flex; gap: 14px; align-items: baseline; justify-content: center; flex-wrap: wrap;
+    font-size: 14px; color: var(--text); text-align: center; max-width: 900px;
   }
+  .lightbox-counter{ font-family:'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
   @media (max-width: 700px){
-    .lightbox{ padding: 20px; }
-    .lightbox-nav{ width: 36px; height:36px; font-size: 15px; }
-    .lightbox-prev{ left: 4px; }
-    .lightbox-next{ right: 4px; }
-    .lightbox-close{ top: -40px; }
+    .lightbox{ padding: 64px 14px 24px; }
+    .lightbox-nav{ width: 36px; height: 36px; font-size: 15px; }
+    .lightbox-prev{ left: 6px; }
+    .lightbox-next{ right: 6px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{ transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+    .js .reveal{ opacity: 1; transform: none; }
   }
 </style>
+<script>document.documentElement.classList.add('js');</script>
 </head>
 <body>
 
-<header class="nav">
+<header class="nav" id="nav">
   <div class="nav-inner">
-    <div class="nav-name">Antuel Quirino</div>
-    <nav class="nav-links">
-      <a href="#work" id="t-nav-work">Work</a>
-      <a href="#about" id="t-nav-about">About</a>
-      <a href="#contact" id="t-nav-contact">Contact</a>
-      <div class="lang-toggle">
-        <button id="lang-en" onclick="setLang('en')">EN</button>
-        <button id="lang-es" onclick="setLang('es')">ES</button>
+    <a class="nav-name" href="#top" aria-label="Antuel Quirino">
+      <span class="nav-mark mono" aria-hidden="true">AQ</span><span class="nav-full">Antuel Quirino</span>
+    </a>
+    <div class="nav-right">
+      <nav class="nav-links" aria-label="Sections">
+        <a href="#work" id="t-nav-work">Work</a>
+        <a href="#about" id="t-nav-about">About</a>
+        <a href="#contact" id="t-nav-contact">Contact</a>
+      </nav>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button id="lang-en" onclick="setLang('en')" lang="en">EN</button>
+        <button id="lang-es" onclick="setLang('es')" lang="es">ES</button>
       </div>
-    </nav>
+    </div>
   </div>
 </header>
 
+<main id="top">
 <section class="hero">
-  <div class="eyebrow" id="t-eyebrow">Data Engineering &amp; Dashboard Design</div>
-  <h1 id="t-h1">Clean, secure data — turned into <span class="accent">dashboards for analysis and decision-making.</span></h1>
-  <p class="hero-sub" id="t-hero-sub">
-    From raw APIs to production-grade web dashboards, I extract and transform data, secure it end to end, and design the interfaces that turn it into KPIs — giving teams the reliable, up-to-date numbers they need for data-driven decisions.
-  </p>
+  <div class="hero-inner">
+    <div class="eyebrow" id="t-eyebrow">Data Engineering &amp; Dashboard Design</div>
+    <h1 id="t-h1">Clean, secure data — turned into <span class="accent">dashboards for analysis and decision-making.</span></h1>
+    <p class="hero-sub" id="t-hero-sub">
+      From raw APIs to production-grade web dashboards, I extract and transform data, secure it end to end, and design the interfaces that turn it into KPIs — giving teams the reliable, up-to-date numbers they need for data-driven decisions.
+    </p>
+    <div class="cta">
+      <a class="btn btn-primary" href="#work" id="t-cta-work">See projects ↓</a>
+      <a class="btn" href="#contact" id="t-cta-contact">Get in touch</a>
+    </div>
 
-  <div class="pipeline">
-    <div class="pipe-node">
-      <div class="pipe-dot"></div>
-      <div class="pipe-label" id="t-pipe-1">EXTRACT</div>
-    </div>
-    <div class="pipe-line"></div>
-    <div class="pipe-node">
-      <div class="pipe-dot"></div>
-      <div class="pipe-label" id="t-pipe-2">TRANSFORM</div>
-    </div>
-    <div class="pipe-line"></div>
-    <div class="pipe-node">
-      <div class="pipe-dot"></div>
-      <div class="pipe-label" id="t-pipe-3">LOAD</div>
-    </div>
-    <div class="pipe-line"></div>
-    <div class="pipe-node">
-      <div class="pipe-dot"></div>
-      <div class="pipe-label" id="t-pipe-4">ANALYZE</div>
+    <div class="pipeline">
+      <div class="pipe-node">
+        <div class="pipe-head"><span class="pipe-dot"></span><span class="pipe-num">01</span></div>
+        <div class="pipe-label" id="t-pipe-1">EXTRACT</div>
+        <div class="pipe-tools">Python · APIs</div>
+      </div>
+      <div class="pipe-node">
+        <div class="pipe-head"><span class="pipe-dot"></span><span class="pipe-num">02</span></div>
+        <div class="pipe-label" id="t-pipe-2">TRANSFORM</div>
+        <div class="pipe-tools">dbt · SQL · tests</div>
+      </div>
+      <div class="pipe-node">
+        <div class="pipe-head"><span class="pipe-dot"></span><span class="pipe-num">03</span></div>
+        <div class="pipe-label" id="t-pipe-3">LOAD</div>
+        <div class="pipe-tools">BigQuery · GitHub Actions</div>
+      </div>
+      <div class="pipe-node">
+        <div class="pipe-head"><span class="pipe-dot"></span><span class="pipe-num">04</span></div>
+        <div class="pipe-label" id="t-pipe-4">ANALYZE</div>
+        <div class="pipe-tools">Dashboards · AI agents</div>
+      </div>
     </div>
   </div>
 </section>
 
 <section class="section" id="work">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="section-num">01</span>
-    <span class="section-title" id="t-work-title">Selected Projects</span>
+    <h2 class="section-title" id="t-work-title">Selected Projects</h2>
     <span class="section-line"></span>
   </div>
-
-  <div class="grid">
-
-    <div class="card">
-      <div class="card-media">
-        <span class="media-tag">DEMO</span>
-        <button class="gallery-btn" id="t-gallery-btn-1" onclick="event.stopPropagation(); openGallery('insightflow')">⊞ Gallery</button>
-        <video autoplay muted loop playsinline preload="metadata" poster="assets/img/insightflow-1.webp" aria-label="InsightFlow demo: asking the AI analyst a question and browsing the dashboard">
-          <source src="assets/video/insightflow-demo.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="card-body">
-      <div class="card-title">InsightFlow</div>
-      <p class="card-desc" id="t-card1-desc">
-        Revenue, churn and retention for a B2B SaaS company, plus an AI analyst you can ask in plain English: it writes and checks the SQL, runs it on BigQuery and explains the answer. Bilingual (EN/ES).
-      </p>
-      <div class="card-tags">
-        <span class="tag">BigQuery</span>
-        <span class="tag">dbt</span>
-        <span class="tag">FastAPI</span>
-        <span class="tag">Next.js</span>
-        <span class="tag">OpenAI API</span>
-      </div>
-      <div class="card-links">
-        <a href="https://insight-flow-five-beta.vercel.app" target="_blank" rel="noopener" id="t-live-1">Live dashboard ↗</a>
-        <a href="https://insightflow-api-936762673660.europe-west1.run.app/docs" target="_blank" rel="noopener" id="t-api-1">API docs ↗</a>
-        <a href="https://github.com/antuelquirino/InsightFlow" target="_blank" rel="noopener">GitHub ↗</a>
-      </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-media">
-        <span class="media-tag">DEMO</span>
-        <button class="gallery-btn" id="t-gallery-btn-2" onclick="event.stopPropagation(); openGallery('financial')">⊞ Gallery</button>
-        <video autoplay muted loop playsinline preload="metadata" poster="assets/img/financial-market-1.webp" aria-label="Financial Market demo: changing ticker and period, then the Risk and Sectors screens">
-          <source src="assets/video/financial-market-demo.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="card-body">
-      <div class="card-title">Financial Market Analysis</div>
-      <p class="card-desc" id="t-card2-desc">
-        Every weekday after the US close, a pipeline loads prices for stocks and the 11 sector ETFs, computes return and risk (drawdown, volatility, Sharpe, beta) with dbt, and updates a bilingual dashboard that compares everything with the S&amp;P 500.
-      </p>
-      <div class="card-tags">
-        <span class="tag">BigQuery</span>
-        <span class="tag">dbt</span>
-        <span class="tag">FastAPI</span>
-        <span class="tag">Next.js</span>
-        <span class="tag">GitHub Actions</span>
-      </div>
-      <div class="card-links">
-        <a href="https://financial-market-analysis.vercel.app" target="_blank" rel="noopener" id="t-live-2">Live dashboard ↗</a>
-        <a href="https://market-api-7cjzbizs7q-uc.a.run.app/docs" target="_blank" rel="noopener" id="t-api-2">API docs ↗</a>
-        <a href="https://public.tableau.com/app/profile/antuel.quirino/viz/Perfomancevs_Benchmark/Dashboard1" target="_blank" rel="noopener">Tableau ↗</a>
-        <a href="https://github.com/antuelquirino/Financial-Market-Analysis" target="_blank" rel="noopener">GitHub ↗</a>
-      </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-media">
-        <span class="media-tag">DEMO</span>
-        <button class="gallery-btn" id="t-gallery-btn-3" onclick="event.stopPropagation(); openGallery('hotelbike')">⊞ Gallery</button>
-        <video autoplay muted loop playsinline poster="assets/img/hotelbike-1.png">
-          <source src="assets/video/hotelbike-demo.mp4" type="video/mp4">
-        </video>
-      </div>
-      <div class="card-body">
-      <div class="card-title">HotelBike Co. Fleet Tracking</div>
-      <p class="card-desc" id="t-card3-desc">
-        A live map for a bike-rental business, showing exactly where every bike is and flagging any that go missing or need maintenance — built as a working prototype for a real small business.
-      </p>
-      <div class="card-tags">
-        <span class="tag">Streamlit</span>
-        <span class="tag">PyDeck</span>
-        <span class="tag">Plotly</span>
-      </div>
-      <div class="card-links">
-        <a href="https://hotelbike-fleet-tracking-byii5lzzkzu7acpxwat9zs.streamlit.app/" target="_blank" id="t-live-3">Live App ↗</a>
-        <a href="https://github.com/antuelquirino/HotelBike-Fleet-Tracking" target="_blank">GitHub ↗</a>
-      </div>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-media" onclick="openGallery('fx')">
-        <img src="assets/img/fx-datalake.png" alt="FX Data Lake pipeline code screenshot">
-        <div class="media-hint"><span id="t-gallery-hint-4">View gallery →</span></div>
-      </div>
-      <div class="card-body">
-      <div class="card-title">FX Data Lake Pipeline</div>
-      <p class="card-desc" id="t-card4-desc">
-        A self-contained pipeline that pulls daily currency exchange rates and keeps a running history — built to demonstrate incremental loading without relying on a cloud warehouse.
-      </p>
-      <div class="card-tags">
-        <span class="tag">Python</span>
-        <span class="tag">Delta Lake</span>
-        <span class="tag">Pandas</span>
-      </div>
-      <div class="card-links">
-        <a href="https://github.com/antuelquirino/FX-DataLake-Pipeline" target="_blank">GitHub ↗</a>
-      </div>
-      </div>
-    </div>
-
-  </div>
+  <div class="featured" id="featured"></div>
+  <h3 class="subhead reveal" id="t-more-title">More projects</h3>
+  <div class="grid" id="more"></div>
 </section>
 
 <section class="section" id="about">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="section-num">02</span>
-    <span class="section-title" id="t-about-title">About</span>
+    <h2 class="section-title" id="t-about-title">About</h2>
     <span class="section-line"></span>
   </div>
-  <p class="about-text" id="t-about-text">
-    Data is the throughline of everything I build: pulling and reshaping it from APIs and databases until it's clean and trustworthy, handling it securely — credentials, access, and pipelines built so nothing sensitive leaks by accident — and designing the web dashboards that put the right numbers in front of the right person, updated automatically, every day. Increasingly, that also means integrating AI agents that let people query that data directly instead of waiting on a report. I care less about the tool of the week and more about whether someone can look at a screen and know what to do next.
-  </p>
+  <div class="about-grid">
+    <p class="about-text reveal" id="t-about-text">
+      Data is the throughline of everything I build: pulling and reshaping it from APIs and databases until it's clean and trustworthy, handling it securely — credentials, access, and pipelines built so nothing sensitive leaks by accident — and designing the web dashboards that put the right numbers in front of the right person, updated automatically, every day. Increasingly, that also means integrating AI agents that let people query that data directly instead of waiting on a report. I care less about the tool of the week and more about whether someone can look at a screen and know what to do next.
+    </p>
+    <div class="stack reveal">
+      <div class="stack-row">
+        <span class="stack-label" id="t-stack-data">Data</span>
+        <div class="tags"><span class="tag">Python</span><span class="tag">SQL</span><span class="tag">dbt</span><span class="tag">BigQuery</span><span class="tag">Delta Lake</span></div>
+      </div>
+      <div class="stack-row">
+        <span class="stack-label" id="t-stack-apps">Apps &amp; dashboards</span>
+        <div class="tags"><span class="tag">FastAPI</span><span class="tag">Next.js</span><span class="tag">Streamlit</span><span class="tag">Tableau</span></div>
+      </div>
+      <div class="stack-row">
+        <span class="stack-label" id="t-stack-ops">Cloud &amp; automation</span>
+        <div class="tags"><span class="tag">Google Cloud</span><span class="tag">Cloud Run</span><span class="tag">GitHub Actions</span><span class="tag">Vercel</span></div>
+      </div>
+      <div class="stack-row">
+        <span class="stack-label" id="t-stack-ai">AI</span>
+        <div class="tags"><span class="tag">OpenAI API</span><span class="tag">LLM agents</span></div>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section class="section" id="education">
-  <div class="section-head">
+  <div class="section-head reveal">
     <span class="section-num">03</span>
-    <span class="section-title" id="t-edu-title">Education &amp; Certifications</span>
+    <h2 class="section-title" id="t-edu-title">Education &amp; Certifications</h2>
     <span class="section-line"></span>
   </div>
   <div class="cert-list">
-    <div class="cert-item">
-      <span class="cert-year">2026</span>
+    <div class="cert-item reveal">
+      <span class="cert-icon" aria-hidden="true">◆</span>
       <div class="cert-body">
         <strong id="t-cert1-title">Data Engineering Specialization</strong>
-        <span>UTN Buenos Aires</span>
+        <span>UTN Buenos Aires · 2026</span>
       </div>
     </div>
-    <div class="cert-item">
-      <span class="cert-year">—</span>
+    <div class="cert-item reveal">
+      <span class="cert-icon" aria-hidden="true">◆</span>
       <div class="cert-body">
         <strong id="t-cert2-title">Google Data Analytics Professional Certificate</strong>
         <span id="t-cert2-sub">Google — SQL, Tableau, data analysis</span>
@@ -695,93 +525,340 @@
   </div>
 </section>
 
-<footer id="contact">
+<section class="section" id="contact">
+  <div class="contact reveal">
+    <div>
+      <h2 id="t-contact-title">Have data that should be telling you something?</h2>
+      <p id="t-contact-sub">I'm open to data engineering and analytics roles and projects.</p>
+    </div>
+    <div class="cta">
+      <a class="btn btn-primary" href="mailto:antuel.quirino@gmail.com" id="t-contact-email">Email me</a>
+      <a class="btn" href="https://www.linkedin.com/in/antuel-quirino" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="btn" href="https://github.com/antuelquirino" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
   <div class="footer-inner">
-    <div class="footer-name">Antuel Quirino</div>
+    <span>© <span id="year">2026</span> Antuel Quirino</span>
     <div class="footer-links">
       <a href="mailto:antuel.quirino@gmail.com" id="t-footer-email">Email</a>
-      <a href="https://www.linkedin.com/in/antuel-quirino" target="_blank">LinkedIn</a>
-      <a href="https://github.com/antuelquirino" target="_blank">GitHub</a>
+      <a href="https://www.linkedin.com/in/antuel-quirino" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://github.com/antuelquirino" target="_blank" rel="noopener">GitHub</a>
     </div>
   </div>
 </footer>
 
-<div class="lightbox" id="lightbox">
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lightbox-text">
   <div class="lightbox-frame">
     <button class="lightbox-close" id="t-lightbox-close" onclick="closeGallery()">Close ✕</button>
-    <button class="lightbox-nav lightbox-prev" onclick="navGallery(-1)">‹</button>
-    <img id="lightbox-img" src="" alt="Project screenshot">
-    <button class="lightbox-nav lightbox-next" onclick="navGallery(1)">›</button>
+    <button class="lightbox-nav lightbox-prev" onclick="navGallery(-1)" aria-label="Previous image">‹</button>
+    <img id="lightbox-img" src="" alt="">
+    <button class="lightbox-nav lightbox-next" onclick="navGallery(1)" aria-label="Next image">›</button>
   </div>
+  <div class="lightbox-caption"><span id="lightbox-text"></span><span class="lightbox-counter" id="lightbox-counter"></span></div>
 </div>
-<div class="lightbox-counter" id="lightbox-counter" style="display:none;"></div>
 
 <script>
-  const galleries = {
-    financial: [
-      "assets/img/financial-market-1.webp",
-      "assets/img/financial-market-2.webp",
-      "assets/img/financial-market-3.webp",
-      "assets/img/financial-market-4.webp",
-      "assets/img/financial-market-5.webp",
-      "assets/img/financial-market-6.webp"
-    ],
-    insightflow: [
-      "assets/img/insightflow-1.webp",
-      "assets/img/insightflow-2.webp",
-      "assets/img/insightflow-3.webp",
-      "assets/img/insightflow-4.webp",
-      "assets/img/insightflow-5.webp",
-      "assets/img/insightflow-6.webp"
-    ],
-    fx: [
-      "assets/img/fx-datalake.png"
-    ],
-    hotelbike: [
-      "assets/img/hotelbike-1.png"
-    ]
+  /* =====================================================================
+     PROJECTS. To add a project, add one object to this list: the card,
+     its gallery and both languages come from here. "featured: true" puts
+     it in the large layout at the top; the rest go to "More projects".
+     ===================================================================== */
+  const PROJECTS = [
+    {
+      id: 'insightflow',
+      featured: true,
+      title: 'InsightFlow',
+      kicker: { en: 'Analytics engineering · AI analyst', es: 'Analytics engineering · Analista de IA' },
+      desc: {
+        en: 'Revenue, churn and retention for a B2B SaaS company, plus an AI analyst you can ask in plain English: it writes and checks the SQL, runs it on BigQuery and explains the answer.',
+        es: 'Ingresos, bajas y retención de una empresa B2B SaaS, y un analista de IA al que le preguntás en lenguaje natural: escribe y valida el SQL, lo ejecuta en BigQuery y explica la respuesta.'
+      },
+      highlights: {
+        en: [
+          'dbt models in BigQuery, with the business stories in the data checked by tests',
+          'The agent only runs validated SELECTs on the marts, with a byte cap and rate limits',
+          'FastAPI on Cloud Run and a bilingual Next.js dashboard on Vercel'
+        ],
+        es: [
+          'Modelos dbt en BigQuery, con las historias de negocio de los datos verificadas por tests',
+          'El agente solo ejecuta SELECTs validados sobre los marts, con tope de bytes y límite de uso',
+          'FastAPI en Cloud Run y un dashboard bilingüe en Next.js publicado en Vercel'
+        ]
+      },
+      tags: ['BigQuery', 'dbt', 'FastAPI', 'Next.js', 'OpenAI API'],
+      url: 'insight-flow-five-beta.vercel.app',
+      video: 'assets/video/insightflow-demo.mp4',
+      poster: 'assets/img/insightflow-1.webp',
+      links: [
+        { kind: 'live', href: 'https://insight-flow-five-beta.vercel.app' },
+        { kind: 'api', href: 'https://insightflow-api-936762673660.europe-west1.run.app/docs' },
+        { kind: 'github', href: 'https://github.com/antuelquirino/InsightFlow' }
+      ],
+      gallery: [
+        { src: 'assets/img/insightflow-1.webp', en: 'Ask InsightFlow leads the page; the dashboard follows', es: 'Arriba, el analista de IA; abajo, el dashboard' },
+        { src: 'assets/img/insightflow-2.webp', en: 'An answer: explanation, table and the SQL behind it', es: 'Una respuesta: explicación, tabla y el SQL que la generó' },
+        { src: 'assets/img/insightflow-3.webp', en: 'Lead finding and KPIs, each against last month', es: 'Hallazgo principal y KPIs, cada uno contra el mes anterior' },
+        { src: 'assets/img/insightflow-4.webp', en: 'Charts titled with what they show', es: 'Gráficos titulados con lo que muestran' },
+        { src: 'assets/img/insightflow-5.webp', en: 'The Spanish version', es: 'La versión en español' },
+        { src: 'assets/img/insightflow-6.webp', en: 'Dark mode', es: 'Modo oscuro' }
+      ]
+    },
+    {
+      id: 'financial',
+      featured: true,
+      title: 'Financial Market Analysis',
+      kicker: { en: 'Data pipeline · Risk analytics', es: 'Pipeline de datos · Análisis de riesgo' },
+      desc: {
+        en: 'Every weekday after the US close, a pipeline loads prices for stocks and the 11 sector ETFs, computes return and risk with dbt, and updates a bilingual dashboard that compares everything with the S&amp;P 500.',
+        es: 'Cada día hábil, después del cierre en EE. UU., un pipeline carga precios de acciones y de los 11 ETF sectoriales, calcula rendimiento y riesgo con dbt y actualiza un dashboard bilingüe que compara todo contra el S&amp;P 500.'
+      },
+      highlights: {
+        en: [
+          'Scheduled GitHub Actions with Workload Identity Federation: no keys stored anywhere',
+          'Idempotent MERGE loads, dbt tests and freshness checks; metrics verified against pandas',
+          'Drawdown, volatility, Sharpe and beta per ticker and sector, at near-zero cost'
+        ],
+        es: [
+          'GitHub Actions programado con Workload Identity Federation: sin claves guardadas',
+          'Cargas idempotentes con MERGE, tests y frescura en dbt; métricas verificadas contra pandas',
+          'Drawdown, volatilidad, Sharpe y beta por ticker y sector, con costo casi cero'
+        ]
+      },
+      tags: ['BigQuery', 'dbt', 'FastAPI', 'Next.js', 'GitHub Actions'],
+      url: 'financial-market-analysis.vercel.app',
+      video: 'assets/video/financial-market-demo.mp4',
+      poster: 'assets/img/financial-market-1.webp',
+      links: [
+        { kind: 'live', href: 'https://financial-market-analysis.vercel.app' },
+        { kind: 'api', href: 'https://market-api-7cjzbizs7q-uc.a.run.app/docs' },
+        { kind: 'tableau', href: 'https://public.tableau.com/app/profile/antuel.quirino/viz/Perfomancevs_Benchmark/Dashboard1' },
+        { kind: 'github', href: 'https://github.com/antuelquirino/Financial-Market-Analysis' }
+      ],
+      gallery: [
+        { src: 'assets/img/financial-market-1.webp', en: 'Overview: return and risk against SPY', es: 'Resumen: rendimiento y riesgo contra SPY' },
+        { src: 'assets/img/financial-market-2.webp', en: 'Risk: the deepest fall and how long recovery took', es: 'Riesgo: la peor caída y cuánto tardó en recuperarse' },
+        { src: 'assets/img/financial-market-3.webp', en: 'Sectors: risk against return for the 11 SPDR ETFs', es: 'Sectores: riesgo contra rendimiento de los 11 ETF SPDR' },
+        { src: 'assets/img/financial-market-4.webp', en: 'The Spanish version, with Argentine formats', es: 'La versión en español, con formatos argentinos' },
+        { src: 'assets/img/financial-market-5.webp', en: 'Dark mode', es: 'Modo oscuro' },
+        { src: 'assets/img/financial-market-6.webp', en: 'The design system behind the dashboard', es: 'El sistema de diseño detrás del dashboard' }
+      ]
+    },
+    {
+      id: 'hotelbike',
+      featured: false,
+      title: 'HotelBike Co. Fleet Tracking',
+      desc: {
+        en: 'A live map for a bike-rental business, showing exactly where every bike is and flagging any that go missing or need maintenance — built as a working prototype for a real small business.',
+        es: 'Un mapa en vivo para un negocio de alquiler de bicicletas, mostrando exactamente dónde está cada una y marcando las que faltan o necesitan mantenimiento — construido como prototipo real para una pequeña empresa.'
+      },
+      tags: ['Streamlit', 'PyDeck', 'Plotly'],
+      url: 'hotelbike-fleet-tracking.streamlit.app',
+      video: 'assets/video/hotelbike-demo.mp4',
+      poster: 'assets/img/hotelbike-1.png',
+      links: [
+        { kind: 'app', href: 'https://hotelbike-fleet-tracking-byii5lzzkzu7acpxwat9zs.streamlit.app/' },
+        { kind: 'github', href: 'https://github.com/antuelquirino/HotelBike-Fleet-Tracking' }
+      ],
+      gallery: [
+        { src: 'assets/img/hotelbike-1.png', en: 'Fleet map and status', es: 'Mapa y estado de la flota' }
+      ]
+    },
+    {
+      id: 'fx',
+      featured: false,
+      title: 'FX Data Lake Pipeline',
+      desc: {
+        en: 'A self-contained pipeline that pulls daily currency exchange rates and keeps a running history — built to demonstrate incremental loading without relying on a cloud warehouse.',
+        es: 'Un pipeline autocontenido que trae cotizaciones de divisas todos los días y mantiene un historial — pensado para mostrar carga incremental sin depender de un data warehouse en la nube.'
+      },
+      tags: ['Python', 'Delta Lake', 'Pandas'],
+      url: 'github.com/antuelquirino/FX-DataLake-Pipeline',
+      image: 'assets/img/fx-datalake.png',
+      links: [
+        { kind: 'github', href: 'https://github.com/antuelquirino/FX-DataLake-Pipeline' }
+      ],
+      gallery: [
+        { src: 'assets/img/fx-datalake.png', en: 'Incremental load with a watermark', es: 'Carga incremental con marca de agua' }
+      ]
+    }
+  ];
+
+  const LINK_LABELS = {
+    live:    { en: 'Live dashboard', es: 'Dashboard en vivo' },
+    app:     { en: 'Live app', es: 'App en vivo' },
+    api:     { en: 'API docs', es: 'API' },
+    tableau: { en: 'Tableau', es: 'Tableau' },
+    github:  { en: 'GitHub', es: 'GitHub' }
   };
 
-  let currentGallery = [];
-  let currentIndex = 0;
+  /* Static text, by element id. */
+  const translations = {
+    en: {
+      't-nav-work': 'Work', 't-nav-about': 'About', 't-nav-contact': 'Contact',
+      't-eyebrow': 'Data Engineering &amp; Dashboard Design',
+      't-h1': 'Clean, secure data — turned into <span class="accent">dashboards for analysis and decision-making.</span>',
+      't-hero-sub': "From raw APIs to production-grade web dashboards, I extract and transform data, secure it end to end, and design the interfaces that turn it into KPIs — giving teams the reliable, up-to-date numbers they need for data-driven decisions.",
+      't-cta-work': 'See projects ↓', 't-cta-contact': 'Get in touch',
+      't-pipe-1': 'EXTRACT', 't-pipe-2': 'TRANSFORM', 't-pipe-3': 'LOAD', 't-pipe-4': 'ANALYZE',
+      't-work-title': 'Selected Projects', 't-more-title': 'More projects',
+      't-about-title': 'About',
+      't-about-text': "Data is the throughline of everything I build: pulling and reshaping it from APIs and databases until it's clean and trustworthy, handling it securely — credentials, access, and pipelines built so nothing sensitive leaks by accident — and designing the web dashboards that put the right numbers in front of the right person, updated automatically, every day. Increasingly, that also means integrating AI agents that let people query that data directly instead of waiting on a report. I care less about the tool of the week and more about whether someone can look at a screen and know what to do next.",
+      't-stack-data': 'Data', 't-stack-apps': 'Apps &amp; dashboards', 't-stack-ops': 'Cloud &amp; automation', 't-stack-ai': 'AI',
+      't-edu-title': 'Education &amp; Certifications',
+      't-cert1-title': 'Data Engineering Specialization',
+      't-cert2-title': 'Google Data Analytics Professional Certificate',
+      't-cert2-sub': 'Google — SQL, Tableau, data analysis',
+      't-contact-title': 'Have data that should be telling you something?',
+      't-contact-sub': "I'm open to data engineering and analytics roles and projects.",
+      't-contact-email': 'Email me',
+      't-footer-email': 'Email',
+      't-lightbox-close': 'Close ✕'
+    },
+    es: {
+      't-nav-work': 'Proyectos', 't-nav-about': 'Sobre mí', 't-nav-contact': 'Contacto',
+      't-eyebrow': 'Ingeniería de Datos &amp; Diseño de Dashboards',
+      't-h1': 'Datos limpios y seguros, convertidos en <span class="accent">dashboards para análisis y toma de decisiones.</span>',
+      't-hero-sub': 'Desde APIs sin procesar hasta dashboards web de nivel profesional: extraigo y transformo datos, los manejo de forma segura de punta a punta, y diseño las interfaces que los convierten en KPIs — dándole a los equipos los números confiables y actualizados que necesitan para tomar decisiones basadas en datos.',
+      't-cta-work': 'Ver proyectos ↓', 't-cta-contact': 'Contacto',
+      't-pipe-1': 'EXTRAER', 't-pipe-2': 'TRANSFORMAR', 't-pipe-3': 'CARGAR', 't-pipe-4': 'ANALIZAR',
+      't-work-title': 'Proyectos destacados', 't-more-title': 'Otros proyectos',
+      't-about-title': 'Sobre mí',
+      't-about-text': 'El dato es el hilo conductor de todo lo que construyo: lo extraigo y transformo desde APIs y bases de datos hasta que queda limpio y confiable, lo manejo de forma segura — credenciales, accesos y pipelines armados para que nada sensible se filtre por error — y diseño los dashboards web que ponen los números correctos frente a la persona correcta, actualizados automáticamente, todos los días. Cada vez más, eso también significa integrar agentes de IA que le permiten a las personas consultar esos datos directamente en vez de esperar un reporte. Me importa menos la herramienta de moda y más que alguien pueda mirar una pantalla y saber qué hacer.',
+      't-stack-data': 'Datos', 't-stack-apps': 'Apps y dashboards', 't-stack-ops': 'Nube y automatización', 't-stack-ai': 'IA',
+      't-edu-title': 'Educación y Certificaciones',
+      't-cert1-title': 'Especialización en Data Engineering',
+      't-cert2-title': 'Certificado Profesional de Google Data Analytics',
+      't-cert2-sub': 'Google — SQL, Tableau, análisis de datos',
+      't-contact-title': '¿Tenés datos que deberían decirte algo?',
+      't-contact-sub': 'Estoy abierto a roles y proyectos de ingeniería y análisis de datos.',
+      't-contact-email': 'Escribime',
+      't-footer-email': 'Correo',
+      't-lightbox-close': 'Cerrar ✕'
+    }
+  };
 
-  function openGallery(key){
-    currentGallery = galleries[key] || [];
-    currentIndex = 0;
-    if(currentGallery.length === 0) return;
-    render();
-    document.getElementById('lightbox').classList.add('open');
-    document.body.style.overflow = 'hidden';
+  const UI = {
+    en: { gallery: 'Gallery', live: 'Live', open: 'Open the gallery' },
+    es: { gallery: 'Galería', live: 'En vivo', open: 'Abrir la galería' }
+  };
+
+  let lang = 'en';
+
+  /* ---------- Rendering ---------- */
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const isLive = (p) => p.links.some((l) => l.kind === 'live' || l.kind === 'app');
+
+  function media(p){
+    const ui = UI[lang];
+    const visual = p.video
+      ? `<video autoplay muted loop playsinline preload="metadata" poster="${p.poster}" aria-label="${esc(p.title)} demo"><source src="${p.video}" type="video/mp4"></video>`
+      : `<img src="${p.image}" alt="${esc(p.title)}" loading="lazy">`;
+    return `
+      <div class="frame">
+        <div class="frame-bar">
+          <span class="frame-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+          <span class="frame-url">${esc(p.url)}</span>
+          <span class="frame-actions">
+            ${isLive(p) ? `<span class="chip chip-live">${ui.live}</span>` : ''}
+            <button class="chip" onclick="openGallery('${p.id}')">⊞ ${ui.gallery}</button>
+          </span>
+        </div>
+        <div class="frame-media" onclick="openGallery('${p.id}')" role="button" tabindex="0"
+             aria-label="${ui.open}: ${esc(p.title)}"
+             onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openGallery('${p.id}')}">${visual}</div>
+      </div>`;
   }
 
+  function links(p){
+    return `<div class="links">${p.links.map((l, i) => `<a href="${l.href}" target="_blank" rel="noopener"${i === 0 && isLive(p) ? ' class="primary"' : ''}>${LINK_LABELS[l.kind][lang]} <span class="arrow" aria-hidden="true">↗</span></a>`).join('')}</div>`;
+  }
+
+  const tags = (p) => `<div class="tags">${p.tags.map((t) => `<span class="tag">${esc(t)}</span>`).join('')}</div>`;
+
+  function renderProjects(){
+    document.getElementById('featured').innerHTML = PROJECTS.filter((p) => p.featured).map((p, i) => `
+      <article class="feature reveal${i % 2 ? ' flip' : ''}">
+        <div class="feature-media">${media(p)}</div>
+        <div class="feature-body">
+          <span class="kicker">${p.kicker[lang]}</span>
+          <h3 class="feature-title">${esc(p.title)}</h3>
+          <p class="desc">${p.desc[lang]}</p>
+          ${p.highlights ? `<ul class="highlights">${p.highlights[lang].map((h) => `<li>${h}</li>`).join('')}</ul>` : ''}
+          ${tags(p)}
+          ${links(p)}
+        </div>
+      </article>`).join('');
+
+    document.getElementById('more').innerHTML = PROJECTS.filter((p) => !p.featured).map((p) => `
+      <article class="card reveal">
+        ${media(p)}
+        <div class="card-body">
+          <h3 class="card-title">${esc(p.title)}</h3>
+          <p class="desc">${p.desc[lang]}</p>
+          ${tags(p)}
+          ${links(p)}
+        </div>
+      </article>`).join('');
+    observeReveals();
+    watchVideos();
+  }
+
+  /* ---------- Videos ----------
+     Videos created with innerHTML don't reliably honor autoplay, so play them
+     explicitly: only while on screen (saves battery and data) and never when
+     the visitor asked for reduced motion (the poster frame stays instead). */
+  const calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const videoObserver = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => entries.forEach((en) => {
+        if(en.isIntersecting) en.target.play().catch(() => {});
+        else en.target.pause();
+      }), { threshold: 0.25 })
+    : null;
+  function watchVideos(){
+    document.querySelectorAll('.frame-media video').forEach((v) => {
+      v.muted = true;
+      if(calm){ v.removeAttribute('autoplay'); v.pause(); return; }
+      if(videoObserver) videoObserver.observe(v); else v.play().catch(() => {});
+    });
+  }
+
+  /* ---------- Gallery ---------- */
+  let current = null, index = 0, lastFocus = null;
+
+  function openGallery(id){
+    current = PROJECTS.find((p) => p.id === id);
+    if(!current || !current.gallery.length) return;
+    index = 0;
+    lastFocus = document.activeElement;
+    renderGallery();
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('t-lightbox-close').focus();
+  }
   function closeGallery(){
     document.getElementById('lightbox').classList.remove('open');
     document.body.style.overflow = '';
+    if(lastFocus) lastFocus.focus();
   }
-
   function navGallery(delta){
-    currentIndex = (currentIndex + delta + currentGallery.length) % currentGallery.length;
-    render();
+    index = (index + delta + current.gallery.length) % current.gallery.length;
+    renderGallery();
   }
-
-  function render(){
-    document.getElementById('lightbox-img').src = currentGallery[currentIndex];
-    const counter = document.getElementById('lightbox-counter');
-    const navBtns = document.querySelectorAll('.lightbox-nav');
-    if(currentGallery.length <= 1){
-      counter.style.display = 'none';
-      navBtns.forEach(b => b.style.display = 'none');
-    } else {
-      counter.style.display = 'block';
-      counter.textContent = (currentIndex + 1) + ' / ' + currentGallery.length;
-      navBtns.forEach(b => b.style.display = 'flex');
-    }
+  function renderGallery(){
+    const item = current.gallery[index];
+    const img = document.getElementById('lightbox-img');
+    img.src = item.src;
+    img.alt = item[lang];
+    document.getElementById('lightbox-text').textContent = `${current.title} — ${item[lang]}`;
+    const many = current.gallery.length > 1;
+    document.getElementById('lightbox-counter').textContent = many ? `${index + 1} / ${current.gallery.length}` : '';
+    document.querySelectorAll('.lightbox-nav').forEach((b) => b.style.display = many ? 'flex' : 'none');
   }
-
-  document.getElementById('lightbox').addEventListener('click', function(e){
-    if(e.target === this) closeGallery();
-  });
-
+  document.getElementById('lightbox').addEventListener('click', function(e){ if(e.target === this) closeGallery(); });
   document.addEventListener('keydown', function(e){
     if(!document.getElementById('lightbox').classList.contains('open')) return;
     if(e.key === 'Escape') closeGallery();
@@ -789,88 +866,43 @@
     if(e.key === 'ArrowLeft') navGallery(-1);
   });
 
-  // ---------- LANGUAGE TOGGLE ----------
-  const translations = {
-    en: {
-      't-nav-work': 'Work',
-      't-nav-about': 'About',
-      't-nav-contact': 'Contact',
-      't-eyebrow': 'Data Engineering &amp; Dashboard Design',
-      't-h1': 'Clean, secure data — turned into <span class="accent">dashboards for analysis and decision-making.</span>',
-      't-hero-sub': "From raw APIs to production-grade web dashboards, I extract and transform data, secure it end to end, and design the interfaces that turn it into KPIs — giving teams the reliable, up-to-date numbers they need for data-driven decisions.",
-      't-pipe-1': 'EXTRACT', 't-pipe-2': 'TRANSFORM', 't-pipe-3': 'LOAD', 't-pipe-4': 'ANALYZE',
-      't-work-title': "Selected Projects",
-      't-card1-desc': 'Revenue, churn and retention for a B2B SaaS company, plus an AI analyst you can ask in plain English: it writes and checks the SQL, runs it on BigQuery and explains the answer. Bilingual (EN/ES).',
-      't-live-1': 'Live dashboard ↗',
-      't-api-1': 'API docs ↗',
-      't-gallery-btn-1': '⊞ Gallery',
-      't-card2-desc': 'Every weekday after the US close, a pipeline loads prices for stocks and the 11 sector ETFs, computes return and risk (drawdown, volatility, Sharpe, beta) with dbt, and updates a bilingual dashboard that compares everything with the S&amp;P 500.',
-      't-live-2': 'Live dashboard ↗',
-      't-api-2': 'API docs ↗',
-      't-gallery-btn-2': '⊞ Gallery',
-      't-card3-desc': 'A live map for a bike-rental business, showing exactly where every bike is and flagging any that go missing or need maintenance — built as a working prototype for a real small business.',
-      't-live-3': 'Live App ↗',
-      't-gallery-btn-3': '⊞ Gallery',
-      't-card4-desc': 'A self-contained pipeline that pulls daily currency exchange rates and keeps a running history — built to demonstrate incremental loading without relying on a cloud warehouse.',
-      't-gallery-hint-4': 'View gallery →',
-      't-about-title': 'About',
-      't-about-text': "Data is the throughline of everything I build: pulling and reshaping it from APIs and databases until it's clean and trustworthy, handling it securely — credentials, access, and pipelines built so nothing sensitive leaks by accident — and designing the web dashboards that put the right numbers in front of the right person, updated automatically, every day. Increasingly, that also means integrating AI agents that let people query that data directly instead of waiting on a report. I care less about the tool of the week and more about whether someone can look at a screen and know what to do next.",
-      't-edu-title': 'Education &amp; Certifications',
-      't-cert1-title': 'Data Engineering Specialization',
-      't-cert2-title': 'Google Data Analytics Professional Certificate',
-      't-cert2-sub': 'Google — SQL, Tableau, data analysis',
-      't-footer-email': 'Email',
-      't-lightbox-close': 'Close ✕'
-    },
-    es: {
-      't-nav-work': 'Proyectos',
-      't-nav-about': 'Sobre mí',
-      't-nav-contact': 'Contacto',
-      't-eyebrow': 'Ingeniería de Datos &amp; Diseño de Dashboards',
-      't-h1': 'Datos limpios y seguros, convertidos en <span class="accent">dashboards para análisis y toma de decisiones.</span>',
-      't-hero-sub': 'Desde APIs sin procesar hasta dashboards web de nivel profesional: extraigo y transformo datos, los manejo de forma segura de punta a punta, y diseño las interfaces que los convierten en KPIs — dándole a los equipos los números confiables y actualizados que necesitan para tomar decisiones basadas en datos.',
-      't-pipe-1': 'EXTRAER', 't-pipe-2': 'TRANSFORMAR', 't-pipe-3': 'CARGAR', 't-pipe-4': 'ANALIZAR',
-      't-work-title': 'Proyectos destacados',
-      't-card1-desc': 'Ingresos, bajas y retención de una empresa B2B SaaS, y un analista de IA al que le preguntás en lenguaje natural: escribe y valida el SQL, lo ejecuta en BigQuery y explica la respuesta. Bilingüe (EN/ES).',
-      't-live-1': 'Dashboard en vivo ↗',
-      't-api-1': 'API ↗',
-      't-gallery-btn-1': '⊞ Galería',
-      't-card2-desc': 'Cada día hábil, después del cierre en EE. UU., un pipeline carga precios de acciones y de los 11 ETF sectoriales, calcula rendimiento y riesgo (drawdown, volatilidad, Sharpe, beta) con dbt y actualiza un dashboard bilingüe que compara todo contra el S&amp;P 500.',
-      't-live-2': 'Dashboard en vivo ↗',
-      't-api-2': 'API ↗',
-      't-gallery-btn-2': '⊞ Galería',
-      't-card3-desc': 'Un mapa en vivo para un negocio de alquiler de bicicletas, mostrando exactamente dónde está cada una y marcando las que faltan o necesitan mantenimiento — construido como prototipo real para una pequeña empresa.',
-      't-live-3': 'App en vivo ↗',
-      't-gallery-btn-3': '⊞ Galería',
-      't-card4-desc': 'Un pipeline autocontenido que trae cotizaciones de divisas todos los días y mantiene un historial — pensado para mostrar carga incremental sin depender de un data warehouse en la nube.',
-      't-gallery-hint-4': 'Ver galería →',
-      't-about-title': 'Sobre mí',
-      't-about-text': 'El dato es el hilo conductor de todo lo que construyo: lo extraigo y transformo desde APIs y bases de datos hasta que queda limpio y confiable, lo manejo de forma segura — credenciales, accesos y pipelines armados para que nada sensible se filtre por error — y diseño los dashboards web que ponen los números correctos frente a la persona correcta, actualizados automáticamente, todos los días. Cada vez más, eso también significa integrar agentes de IA que le permiten a las personas consultar esos datos directamente en vez de esperar un reporte. Me importa menos la herramienta de moda y más que alguien pueda mirar una pantalla y saber qué hacer.',
-      't-edu-title': 'Educación y Certificaciones',
-      't-cert1-title': 'Especialización en Data Engineering',
-      't-cert2-title': 'Certificado Profesional de Google Data Analytics',
-      't-cert2-sub': 'Google — SQL, Tableau, análisis de datos',
-      't-footer-email': 'Correo',
-      't-lightbox-close': 'Cerrar ✕'
-    }
-  };
-
-  function setLang(lang){
+  /* ---------- Language ---------- */
+  function setLang(next){
+    lang = next;
     for(const id in translations[lang]){
       const el = document.getElementById(id);
-      if(!el) continue;
-      el.innerHTML = translations[lang][id];
+      if(el) el.innerHTML = translations[lang][id];
     }
-    document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-    document.getElementById('lang-es').classList.toggle('active', lang === 'es');
+    ['en', 'es'].forEach((l) => {
+      const b = document.getElementById('lang-' + l);
+      b.classList.toggle('active', l === lang);
+      b.setAttribute('aria-pressed', l === lang);
+    });
     document.documentElement.lang = lang;
-    localStorage.setItem('site-lang', lang);
+    renderProjects();
+    if(document.getElementById('lightbox').classList.contains('open')) renderGallery();
+    try { localStorage.setItem('site-lang', lang); } catch(e) {}
   }
 
-  (function initLang(){
-    const saved = localStorage.getItem('site-lang');
-    const browserLang = navigator.language.toLowerCase().startsWith('es') ? 'es' : 'en';
-    setLang(saved || browserLang);
+  /* ---------- Reveal on scroll, nav border ---------- */
+  const io = 'IntersectionObserver' in window
+    ? new IntersectionObserver((entries) => entries.forEach((en) => {
+        if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); }
+      }), { rootMargin: '0px 0px -8% 0px' })
+    : null;
+  function observeReveals(){
+    document.querySelectorAll('.reveal:not(.in)').forEach((el) => io ? io.observe(el) : el.classList.add('in'));
+  }
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 8), { passive: true });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  (function init(){
+    let saved = null;
+    try { saved = localStorage.getItem('site-lang'); } catch(e) {}
+    const browser = (navigator.language || '').toLowerCase().startsWith('es') ? 'es' : 'en';
+    setLang(saved || browser);
   })();
 </script>
 
